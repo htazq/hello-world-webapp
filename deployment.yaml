@@ -14,9 +14,7 @@ spec:
     spec:
       containers:
       - name: url-fetcher-container # 容器名称
-        # IMPORTANT: 将 'your-dockerhub-username/your-repo-name:latest' 替换为你实际的 Docker Hub 镜像地址和标签
-        # 例如: 'myusername/url-fetcher:v1.0'
-        image: your-dockerhub-username/your-repo-name:latest
+        image: htazq/hello-k3s-app:latest
         ports:
         - containerPort: 5000 # 容器监听的端口
         resources: # (可选) 资源限制和请求

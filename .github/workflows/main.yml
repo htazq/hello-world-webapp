@@ -28,8 +28,8 @@ jobs:
         file: ./Dockerfile # Dockerfile 的路径
         push: true # 推送镜像
         # IMPORTANT: 将 'your-dockerhub-username/your-repo-name' 替换为你实际的 Docker Hub 仓库名
-        tags: your-dockerhub-username/your-repo-name:latest # 给镜像打上 'latest' 标签 (也可以使用 commit SHA 等更精确的标签)
-        # tags: your-dockerhub-username/your-repo-name:${{ github.sha }} # 使用 commit SHA 作为标签
+        tags: htazq/hello-k3s-app:latest # 给镜像打上 'latest' 标签 (也可以使用 commit SHA 等更精确的标签)
+        # tags: htazq/hello-k3s-app:${{ github.sha }} # 使用 commit SHA 作为标签
 
     - name: Install kubectl # 步骤5：安装 kubectl
       run: |
@@ -49,13 +49,8 @@ jobs:
 
     - name: Deploy to K3s # 步骤8：部署或更新 K3s 应用
       run: |
-        # 应用 Deployment 和 Service 配置
-        # 如果文件不存在，会创建资源；如果文件已存在且有更新，会应用更新
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
-        # 强制更新 Deployment 中的镜像，确保拉取最新镜像 (即使标签是 'latest')
-        # kubectl rollout restart deployment url-fetcher-app
-        # 或者，如果你的镜像标签是动态的 (如 commit SHA)，则需要更新 deployment.yaml 中的 image 字段，或者使用 set image 命令
-        # kubectl set image deployment/url-fetcher-app url-fetcher-container=your-dockerhub-username/your-repo-name:${{ github.sha }}
-
-        echo "Deployment updated!"
+        # 强制重启 Deployment 以拉取可能更新了的 'latest' 镜像
+        kubectl rollout restart deployment url-fetcher-app # <-- 取消这一行的注释 (#)
+        echo "Deployment triggered to restart!"
