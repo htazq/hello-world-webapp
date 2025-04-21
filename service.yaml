@@ -10,5 +10,5 @@ spec:
     - protocol: TCP
       port: 80 # Service 内部监听的端口 (集群内部可以通过 http://url-fetcher-service 访问)
       targetPort: 5000 # 容器监听的端口
-      # nodePort: 30080 # (可选) 指定一个固定的 NodePort 端口 (范围通常是 30000-32767)，如果不指定，Kubernetes 会自动分配一个
+      nodePort: 30080 # (可选) 指定一个固定的 NodePort 端口 (范围通常是 30000-32767)，如果不指定，Kubernetes 会自动分配一个
       # 如果指定，请确保该端口在你的 VPS 防火墙中是开放的
