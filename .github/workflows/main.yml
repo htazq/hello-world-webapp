@@ -1,0 +1,61 @@
+name: Build, Push and Deploy to K3s
+
+on:
+  push:
+    branches: [ main ] # 当代码推送到 main 分支时触发
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest # 在最新的 Ubuntu Runner 上运行
+
+    steps:
+    - name: Checkout code # 步骤1：检出代码
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx # 步骤2：设置 Docker Buildx，用于构建镜像
+      uses: docker/setup-buildx-action@v2
+
+    - name: Login to Docker Hub # 步骤3：登录 Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }} # 从 GitHub Secrets 获取 Docker Hub 用户名
+        password: ${{ secrets.DOCKERHUB_TOKEN }}    # 从 GitHub Secrets 获取 Docker Hub 访问令牌
+
+    - name: Build and push Docker image # 步骤4：构建并推送 Docker 镜像
+      uses: docker/build-push-action@v4
+      with:
+        context: . # Dockerfile 的上下文路径 (当前目录)
+        file: ./Dockerfile # Dockerfile 的路径
+        push: true # 推送镜像
+        # IMPORTANT: 将 'your-dockerhub-username/your-repo-name' 替换为你实际的 Docker Hub 仓库名
+        tags: your-dockerhub-username/your-repo-name:latest # 给镜像打上 'latest' 标签 (也可以使用 commit SHA 等更精确的标签)
+        # tags: your-dockerhub-username/your-repo-name:${{ github.sha }} # 使用 commit SHA 作为标签
+
+    - name: Install kubectl # 步骤5：安装 kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+        chmod +x kubectl
+        sudo mv kubectl /usr/local/bin/
+
+    - name: Set up Kubeconfig # 步骤6：设置 Kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        # 将 K3s 的 Kubeconfig 内容 (通常位于 /etc/rancher/k3s/k3s.yaml) 存储在 GitHub Secrets 的 K3S_KUBECONFIG 中
+        echo "${{ secrets.K3S_KUBECONFIG }}" > $HOME/.kube/config
+        chmod 600 $HOME/.kube/config # 确保配置文件权限安全
+
+    - name: Verify K3s connection # 步骤7：验证 K3s 连接 (可选但推荐)
+      run: kubectl cluster-info
+
+    - name: Deploy to K3s # 步骤8：部署或更新 K3s 应用
+      run: |
+        # 应用 Deployment 和 Service 配置
+        # 如果文件不存在，会创建资源；如果文件已存在且有更新，会应用更新
+        kubectl apply -f deployment.yaml
+        kubectl apply -f service.yaml
+        # 强制更新 Deployment 中的镜像，确保拉取最新镜像 (即使标签是 'latest')
+        # kubectl rollout restart deployment url-fetcher-app
+        # 或者，如果你的镜像标签是动态的 (如 commit SHA)，则需要更新 deployment.yaml 中的 image 字段，或者使用 set image 命令
+        # kubectl set image deployment/url-fetcher-app url-fetcher-container=your-dockerhub-username/your-repo-name:${{ github.sha }}
+
+        echo "Deployment updated!"

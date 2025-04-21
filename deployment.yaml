@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-fetcher-app # Deployment 的名称
+spec:
+  replicas: 2 # 运行 2 个 Pod 副本以提高可用性
+  selector:
+    matchLabels:
+      app: url-fetcher # 选择带有这个标签的 Pod
+  template:
+    metadata:
+      labels:
+        app: url-fetcher # Pod 的标签
+    spec:
+      containers:
+      - name: url-fetcher-container # 容器名称
+        # IMPORTANT: 将 'your-dockerhub-username/your-repo-name:latest' 替换为你实际的 Docker Hub 镜像地址和标签
+        # 例如: 'myusername/url-fetcher:v1.0'
+        image: your-dockerhub-username/your-repo-name:latest
+        ports:
+        - containerPort: 5000 # 容器监听的端口
+        resources: # (可选) 资源限制和请求
+          requests:
+            memory: "64Mi"
+            cpu: "100m" # 0.1 CPU core
+          limits:
+            memory: "128Mi"
+            cpu: "250m" # 0.25 CPU core
