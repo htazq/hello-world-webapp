@@ -51,6 +51,6 @@ jobs:
       run: |
         kubectl apply -f deployment.yaml
         kubectl apply -f service.yaml
-        # 强制重启 Deployment 以拉取可能更新了的 'latest' 镜像
-        kubectl rollout restart deployment url-fetcher-app # <-- 取消这一行的注释 (#)
-        echo "Deployment triggered to restart!"
+        kubectl apply -f ingress.yaml
+        kubectl rollout restart deployment url-fetcher-app
+        echo "Deployment, Service, and Ingress applied/updated!"

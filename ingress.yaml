@@ -1,0 +1,16 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: url-fetcher-ingress 
+spec:
+  rules:
+  - host: test-github.airport.pp.ua 
+    http:
+      paths:
+      - path: / 
+        pathType: Prefix 
+        backend:
+          service:
+            name: url-fetcher-service 
+            port:
+              number: 80 
