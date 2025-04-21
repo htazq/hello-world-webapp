@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: url-fetcher-app # Deployment 的名称
 spec:
-  replicas: 6 # 运行 6 个 Pod 副本以提高可用性
+  replicas: 2 # 运行 6 个 Pod 副本以提高可用性
   selector:
     matchLabels:
       app: url-fetcher # 选择带有这个标签的 Pod
